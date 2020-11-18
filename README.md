@@ -11,24 +11,27 @@ USB interface using the [lib32_usb](https://github.com/dmitrystu/libusb_stm32.gi
 
 # Setup
 
-- Download the arm tool chain from [here](https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2) and extract it to the stm32 root.
-- Download the STM32 F4 Standard Periphiral Libraries from [here](https://www.st.com/en/embedded-software/stsw-stm32065.html) and extract it to the stm32 root.
-- In the stm32 repo:
+Download the arm tool chain from [here](https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2)
+and extract it to the stm32 root.
 
+Download the STM32 F4 Standard Periphiral Libraries from [here](https://www.st.com/en/embedded-software/stsw-stm32065.html)
+and extract it to the stm32 root.
 
-    > git clone https://github.com/dmitrystu/libusb_stm32.git
-    > cd libusb_stm32
-    > git clone https://github.com/ARM-software/CMSIS_5.git CMSIS
-    > git clone --recurse-submodules https://github.com/dmitrystu/stm32h.git CMSIS/Device/ST
+With the stm32 repo as the current directory:
+
+    git clone https://github.com/dmitrystu/libusb_stm32.git
+    cd libusb_stm32
+    git clone https://github.com/ARM-software/CMSIS_5.git CMSIS
+    git clone --recurse-submodules https://github.com/dmitrystu/stm32h.git CMSIS/Device/ST
 
 
 Your stm32 directory should look like this now:
 
-    > gcc-arm-none-eabi-9-2020-q2-update
-    > libusb_stm32
-    > matekf405
-    > README.md
-    > STM32F4xx_DSP_StdPeriph_Lib_V1.8.0
+    gcc-arm-none-eabi-9-2020-q2-update
+    libusb_stm32
+    matekf405
+    README.md
+    STM32F4xx_DSP_StdPeriph_Lib_V1.8.0
 
 # References
 
