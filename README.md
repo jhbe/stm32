@@ -16,18 +16,19 @@ USB interface using the [lib32_usb](https://github.com/dmitrystu/libusb_stm32.gi
 - In the stm32 repo:
 
 
-    git clone https://github.com/dmitrystu/libusb_stm32.git
-    cd libusb_stm32
-    git clone https://github.com/ARM-software/CMSIS_5.git CMSIS
-    git clone --recurse-submodules https://github.com/dmitrystu/stm32h.git CMSIS/Device/ST
+    > git clone https://github.com/dmitrystu/libusb_stm32.git
+    > cd libusb_stm32
+    > git clone https://github.com/ARM-software/CMSIS_5.git CMSIS
+    > git clone --recurse-submodules https://github.com/dmitrystu/stm32h.git CMSIS/Device/ST
+
 
 Your stm32 directory should look like this now:
 
-    gcc-arm-none-eabi-9-2020-q2-update
-    libusb_stm32
-    matekf405
-    README.md
-    STM32F4xx_DSP_StdPeriph_Lib_V1.8.0
+    > gcc-arm-none-eabi-9-2020-q2-update
+    > libusb_stm32
+    > matekf405
+    > README.md
+    > STM32F4xx_DSP_StdPeriph_Lib_V1.8.0
 
 # References
 
