@@ -1,10 +1,16 @@
-//
-// Created by johan on 6/11/20.
-//
+#ifndef DELAY_H
+#define DELAY_H
 
-#ifndef VMG_DELAY_H
-#define VMG_DELAY_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void Delay(int ms);
+void DelayInit(void);
 
-#endif //VMG_DELAY_H
+void DelayMs(uint32_t ms);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

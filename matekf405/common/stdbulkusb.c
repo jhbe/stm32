@@ -1,8 +1,8 @@
-#include "stm32f4xx.h"
-#include "../../common/delay.h"
+#include <stm32f4xx.h>
 #include <usb.h>
-#include <stdio.h>
-#include <string.h>
+#include "stdbulkusb.h"
+//#include "delay.h"
+//#include "led.h"
 
 static usbd_device usbdDevice;
 
@@ -13,7 +13,9 @@ static usbd_device usbdDevice;
 static uint32_t ep0Buffer[EP0_SIZE];
 
 #define EP1_SIZE 64
-static uint32_t ep1Buffer[EP1_SIZE];
+//static uint32_t ep1Buffer[EP1_SIZE];
+
+static onRx s_onRx;
 
 /**
  * The OTG1_FS interrupt handler.
@@ -48,7 +50,7 @@ static struct usb_device_descriptor deviceDescriptor = {
 struct std_config {
     struct usb_config_descriptor config;
     struct usb_interface_descriptor interface;
-    struct usb_endpoint_descriptor ep0out;
+//    struct usb_endpoint_descriptor ep0out;
     struct usb_endpoint_descriptor ep0in;
 };
 
@@ -74,13 +76,13 @@ static struct std_config config_desc = {
                 .bDescriptorType        = USB_DTYPE_INTERFACE,
                 .bInterfaceNumber       = 0,
                 .bAlternateSetting      = 0,
-                .bNumEndpoints          = 2,
+                .bNumEndpoints          = 1, //2,
                 .bInterfaceClass        = USB_CLASS_VENDOR,
                 .bInterfaceSubClass     = USB_SUBCLASS_VENDOR,
                 .bInterfaceProtocol     = USB_PROTO_VENDOR,
                 .iInterface             = NO_DESCRIPTOR,
         },
-        .ep0out = {
+/*        .ep0out = {
                 .bLength                = sizeof(struct usb_endpoint_descriptor),
                 .bDescriptorType        = USB_DTYPE_ENDPOINT,
                 .bEndpointAddress       = EP1_OUT,
@@ -88,7 +90,7 @@ static struct std_config config_desc = {
                 .wMaxPacketSize         = EP1_SIZE,
                 .bInterval              = 0x01,
         },
-        .ep0in = {
+*/        .ep0in = {
                 .bLength                = sizeof(struct usb_endpoint_descriptor),
                 .bDescriptorType        = USB_DTYPE_ENDPOINT,
                 .bEndpointAddress       = EP1_IN,
@@ -111,8 +113,6 @@ static struct usb_string_descriptor *const stringTable[] = {
         &prodDesc,
 };
 
-//static __IO int s_counter = 0;
-
 /**
  * Invoked when an event has occured on endpoint EP1.
  *
@@ -122,8 +122,28 @@ static struct usb_string_descriptor *const stringTable[] = {
  */
 void onEp1(usbd_device *dev, uint8_t event, uint8_t ep) {
     switch (event) {
-        case usbd_evt_eprx:
+        case usbd_evt_eprx: {
+            /*
+             * Read what arrived on the OUT endpoint. Remember, IN/OUT is always relative
+             * the host, not the device.
+             */
+            char rxBuffer[64];
+            int length = usbd_ep_read(dev, EP1_OUT, rxBuffer, 64);
+
+            if (s_onRx != 0) {
+                s_onRx(rxBuffer, length);
+            }
             break;
+        }
+        case usbd_evt_eptx:
+            break;
+
+        case usbd_evt_epsetup:
+            break;
+
+        default: {
+            break;
+        }
     }
 }
 
@@ -143,7 +163,7 @@ usbd_respond onConfig(usbd_device *dev, uint8_t cfg) {
 
             usbd_ep_deconfig(dev, EP1_OUT);
             usbd_ep_deconfig(dev, EP1_IN);
-            usbd_reg_endpoint(dev, EP1_IN, 0);
+           // usbd_reg_endpoint(dev, EP1, 0);
             break;
 
         case 1:
@@ -155,7 +175,7 @@ usbd_respond onConfig(usbd_device *dev, uint8_t cfg) {
              * Register a callback for the endpoint. Note that there is one callback per endpoint; there are no separate
              * IN and OUT callbacks for the same endpoint.
              */
-            usbd_reg_endpoint(dev, EP1_IN, onEp1);
+            //usbd_reg_endpoint(dev, EP1, onEp1);
             usbd_ep_config(dev, EP1_OUT, USB_EPTYPE_BULK, EP1_SIZE);
             usbd_ep_config(dev, EP1_IN, USB_EPTYPE_BULK, EP1_SIZE);
             break;
@@ -201,8 +221,8 @@ usbd_respond onDescriptor(usbd_ctlreq *req, void **address, uint16_t *length) {
     return usbd_ack;
 }
 
-int main(void) {
-    DelayInit();
+void UsbInit(onRx onRxCallback) {
+    s_onRx = onRxCallback;
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
@@ -262,17 +282,12 @@ int main(void) {
     usbd_reg_descr(&usbdDevice, onDescriptor);
     usbd_enable(&usbdDevice, true);
     usbd_connect(&usbdDevice, true);
-
-    while (1) {
-        /*
-         * Write "Foo" once a second.
-         */
-        DelayMs(10);
-        char buffer[64] = "123456789012345678901234567890123456789012345678901234567890123";
-        usbd_ep_write(&usbdDevice, EP1_IN, buffer, 20);
-    }
 }
 
-void assert_failed(uint8_t *file, uint32_t line) {
-    while (1);
+void UsbWrite(char *buffer, int length) {
+    usbd_ep_write(&usbdDevice, EP1_IN, buffer, length);
+}
+
+void UsbPoll(void) {
+    usbd_poll(&usbdDevice);
 }

@@ -11,7 +11,6 @@ add_executable(ledblink.axf
         system_stm32f4xx.c
         ${STDPERIPH_SRC}/misc.c
         ${STDPERIPH_SRC}/stm32f4xx_gpio.c
-        ${STDPERIPH_SRC}/stm32f4xx_tim.c
         ${STDPERIPH_SRC}/stm32f4xx_rcc.c)
 
 target_include_directories(ledblink.axf PUBLIC

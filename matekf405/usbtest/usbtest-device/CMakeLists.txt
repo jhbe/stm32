@@ -20,10 +20,11 @@ add_executable(usbtest-device.axf
         ${STDPERIPH_SRC}/stm32f4xx_tim.c)
 
 target_include_directories(usbtest-device.axf PUBLIC
-.
-${DEVICE_INC}
-${STDPERIPH_INC}
-${USB_CORE_INC}
-${LIB_USB_INC}
-${LIB_CORE_INC}
-${LIB_DEV_INC})
+        .
+        ../../common
+        ${DEVICE_INC}
+        ${STDPERIPH_INC}
+        ${USB_CORE_INC}
+        ${LIB_USB_INC}
+        ${LIB_CORE_INC}
+        ${LIB_DEV_INC})

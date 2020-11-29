@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <libusb-1.0/libusb.h>
+#include <math.h>
 
 #define VENDOR_ID   0x3456
 #define PRODUCT_ID  0x1150
 
-bool g_verbose = false;
+bool g_verbose = true;
 libusb_device_handle *device_handle = NULL;
 unsigned char out_endpoint;
 unsigned char in_endpoint;
@@ -126,7 +127,8 @@ bool Send(unsigned char *buffer, int length) {
      */
     int result;
     int bytes_written;
-    if ((result = libusb_bulk_transfer(device_handle, out_endpoint, buffer, length, &bytes_written, 1000)) != LIBUSB_SUCCESS) {
+    if ((result = libusb_bulk_transfer(device_handle, out_endpoint, buffer, length, &bytes_written, 1000)) !=
+        LIBUSB_SUCCESS) {
         if (g_verbose) {
             printf("libusb_bulk_transfer failed; %s\n", libusb_error_name(result));
         }
@@ -150,10 +152,12 @@ bool Receive(unsigned char *buffer, int *length) {
 
     int result;
     int bytes_read;
-    if ((result = libusb_bulk_transfer(device_handle, in_endpoint, buffer, *length, &bytes_read, 0)) != LIBUSB_SUCCESS) {
+    if ((result = libusb_bulk_transfer(device_handle, in_endpoint, buffer, *length, &bytes_read, 1000)) !=
+        LIBUSB_SUCCESS) {
         if (g_verbose) {
             printf("libusb_bulk_transfer failed; %s\n", libusb_error_name(result));
         }
+        usleep(500000);
         *length = 0;
         return false;
     }
@@ -163,12 +167,25 @@ bool Receive(unsigned char *buffer, int *length) {
 }
 
 void *rx(void *ptr) {
+    int counter = 0;
     while (1) {
         unsigned char buffer[64];
         int length = sizeof(buffer);
         if (Receive(buffer, &length)) {
-            buffer[length] = 0;
-            printf("%s\n", buffer);
+/*            float *acc = (float *)buffer;
+            double sum = sqrt(x*x+y*y+z*z);
+            printf("%i % 2.3f % 2.3f % 2.3f % 2.3f \n", counter++, acc[0], acc[1], acc[2], sum);
+
+            printf("%i ", length);
+            for (int i = 0; i < length; i++) {
+                printf("%02x ", buffer[i]);
+            }
+            printf("\n");
+*/
+//            printf("%i 0x%02x 0x%02x\n", length, buffer[0], buffer[1]);
+
+buffer[length] = 0;
+printf("%i: %s\n", length, buffer);
         }
     }
 }
@@ -181,8 +198,6 @@ int main() {
 
     while (1) {
         usleep(300000);
-
-        Send('J');
     }
 
     Close();
