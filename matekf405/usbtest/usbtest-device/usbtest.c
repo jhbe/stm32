@@ -2,7 +2,6 @@
 #include "../../common/delay.h"
 #include <usb.h>
 #include <stdio.h>
-#include <string.h>
 
 static usbd_device usbdDevice;
 
@@ -13,7 +12,6 @@ static usbd_device usbdDevice;
 static uint32_t ep0Buffer[EP0_SIZE];
 
 #define EP1_SIZE 64
-static uint32_t ep1Buffer[EP1_SIZE];
 
 /**
  * The OTG1_FS interrupt handler.
@@ -111,22 +109,6 @@ static struct usb_string_descriptor *const stringTable[] = {
         &prodDesc,
 };
 
-//static __IO int s_counter = 0;
-
-/**
- * Invoked when an event has occured on endpoint EP1.
- *
- * @param dev The device.
- * @param event The event. One of usbd_evt_*.
- * @param ep The endpoint.
- */
-void onEp1(usbd_device *dev, uint8_t event, uint8_t ep) {
-    switch (event) {
-        case usbd_evt_eprx:
-            break;
-    }
-}
-
 /**
  * Invoked by the libstm32_usb framework when a SET_CONFIG request was received.
  *
@@ -143,7 +125,6 @@ usbd_respond onConfig(usbd_device *dev, uint8_t cfg) {
 
             usbd_ep_deconfig(dev, EP1_OUT);
             usbd_ep_deconfig(dev, EP1_IN);
-            usbd_reg_endpoint(dev, EP1_IN, 0);
             break;
 
         case 1:
@@ -151,11 +132,6 @@ usbd_respond onConfig(usbd_device *dev, uint8_t cfg) {
              * Configuring device, going from ADDRESSED to CONFIGURED
              */
 
-            /*
-             * Register a callback for the endpoint. Note that there is one callback per endpoint; there are no separate
-             * IN and OUT callbacks for the same endpoint.
-             */
-            usbd_reg_endpoint(dev, EP1_IN, onEp1);
             usbd_ep_config(dev, EP1_OUT, USB_EPTYPE_BULK, EP1_SIZE);
             usbd_ep_config(dev, EP1_IN, USB_EPTYPE_BULK, EP1_SIZE);
             break;
@@ -263,13 +239,10 @@ int main(void) {
     usbd_enable(&usbdDevice, true);
     usbd_connect(&usbdDevice, true);
 
+    char buffer[64] = "1234567890123456789012345678901234567890123456789012345678901234";
     while (1) {
-        /*
-         * Write "Foo" once a second.
-         */
         DelayMs(10);
-        char buffer[64] = "123456789012345678901234567890123456789012345678901234567890123";
-        usbd_ep_write(&usbdDevice, EP1_IN, buffer, 20);
+        usbd_ep_write(&usbdDevice, EP1_IN, buffer, 64);
     }
 }
 

@@ -120,11 +120,6 @@ void Close() {
 }
 
 bool Send(unsigned char *buffer, int length) {
-    /*	for (int i = 0; i < length; i++)
-     {
-     printf("%02x ", buffer[i]);
-     }
-     */
     int result;
     int bytes_written;
     if ((result = libusb_bulk_transfer(device_handle, out_endpoint, buffer, length, &bytes_written, 1000)) !=
@@ -147,6 +142,7 @@ bool Send(unsigned char byte) {
     return Send(&byte, 1);
 }
 
+int counter = 0;
 bool Receive(unsigned char *buffer, int *length) {
     memset(buffer, 0xcd, *length);
 
@@ -184,8 +180,8 @@ void *rx(void *ptr) {
 */
 //            printf("%i 0x%02x 0x%02x\n", length, buffer[0], buffer[1]);
 
-buffer[length] = 0;
-printf("%i: %s\n", length, buffer);
+           buffer[length] = 0;
+           printf("% 10i %i: %s\n", counter++, length, buffer);
         }
     }
 }
